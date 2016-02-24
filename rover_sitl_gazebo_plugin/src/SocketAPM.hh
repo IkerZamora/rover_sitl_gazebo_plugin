@@ -32,6 +32,10 @@
 #include <stdio.h>
 #include <string.h>
 
+//REMOVE THESE
+//ROS includes
+#include <ros/ros.h>
+#include <ros/console.h>
 
 class SocketAPM {
 public:

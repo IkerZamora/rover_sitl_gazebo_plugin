@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>rover_model_plugin</name>
+  <version>1.0.0</version>
+  <description>The rover_model_plugin package</description>
+
+  <maintainer email="joedoe@todo.todo">Joe Doe</maintainer>
+  
+  <license>Apache 2.0</license>
+
+  <author email="joedoe@todo.todo">Joe Doe</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>gazebo_ros</build_depend>
+  <build_depend>roscpp</build_depend>
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>roscpp</run_depend>
+
+  <export>
+    <gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}" />
+  </export>
+</package>

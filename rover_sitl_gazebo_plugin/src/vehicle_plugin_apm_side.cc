@@ -108,14 +108,15 @@ bool VehiclePlugin::open_fdm_socket()
 bool VehiclePlugin::receive_apm_input()
 {
     servo_packet pkt;
-    int szRecv;
+    ssize_t szRecv;
 
     if (!_is_control_socket_open) {
         ROS_INFO( PLUGIN_LOG_PREPEND "Cannot receive input from Ardu, for the port is not open !");
         return false;
     }
-
+    ROS_INFO("first");
     szRecv = _sock_control_from_ardu->recv(&pkt, sizeof(pkt), 100);
+    ROS_INFO("second");
     // Expects a servo control packet
     if (szRecv != sizeof(servo_packet)) {
         return false;
