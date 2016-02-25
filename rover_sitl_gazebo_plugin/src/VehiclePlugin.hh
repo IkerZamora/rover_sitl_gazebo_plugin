@@ -161,7 +161,7 @@ class VehiclePlugin : public WorldPlugin
       packet sent to ardupilot_sitl_gazebo
      */
     struct servo_packet {
-        float servos[NB_SERVOS];    // ranges from 0 (no rotation) to 1 (full throttle)
+        float servos[16];    // ranges from 0 (no rotation) to 1 (full throttle)
     };
 
     /*

@@ -194,6 +194,7 @@ void VehiclePlugin::loop_thread()
 
       //iLoopCounter++;
       if (iLoopCounter >= nbSteps) {
+          ROS_INFO("nb");
           iLoopCounter = 0;
           prevloop10_t_start = loop10_t_start;
           loop10_t_start = ros::WallTime::now();
