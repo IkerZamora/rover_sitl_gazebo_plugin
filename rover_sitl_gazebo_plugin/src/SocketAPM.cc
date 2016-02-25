@@ -128,7 +128,7 @@ ssize_t SocketAPM::recv(void *buf, size_t size, uint32_t timeout_ms)
     ROS_INFO("R4");
     tv.tv_usec = (timeout_ms % 1000) * 1000UL;
     ROS_INFO("R5");
-    if (select(fd, &fds, NULL, NULL, &tv) != 1) {
+    if (select(fd+1, &fds, NULL, NULL, &tv) != 1) {
     ROS_INFO("R6");
         return -1;
     }
