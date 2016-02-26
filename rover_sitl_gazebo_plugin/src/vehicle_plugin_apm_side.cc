@@ -65,7 +65,7 @@ bool VehiclePlugin::open_control_socket()
 
     ROS_INFO( PLUGIN_LOG_PREPEND "SUCCESS in binding to port from ArduPilot\n");
     _sock_control_from_ardu->set_blocking(false);
-    _sock_control_from_ardu->reuseaddress();
+    //_sock_control_from_ardu->reuseaddress();
     _is_control_socket_open = true;
 
     return true;
@@ -130,6 +130,9 @@ bool VehiclePlugin::receive_apm_input()
         _cmd_motor_speed[i] = 100.0 * (pkt.servos[i] - 0.5);
     }
 
+    for (i=0; i<NB_SERVOS_MOTOR_SPEED; i++) {
+        ROS_INFO("motor[%d] = %f",i,_cmd_motor_speed[i]);
+    }
     publish_commandMotorSpeed();
     return true;
 }
@@ -149,14 +152,17 @@ void VehiclePlugin::send_apm_output()
     
     // Mutex on '_fdm', for it is concurrently written by ROS callbacks
     _fdm_mutex.lock();
+    ROS_INFO("here?");
     memcpy(&pkt, &_fdm, sizeof(fdm_packet));
+    ROS_INFO("nope");
     _fdm_mutex.unlock();
     
     // Makes sure the timestamp is non 0, otherwise Ardupilot can believe it to be an erroneous packet
     if (pkt.timestamp < 1e-6)
         pkt.timestamp = 1e-6;       // 1e-6 [s] = 0.001 [ms]
-
+    ROS_INFO("maybe here?");
     ssize_t sent = _sock_fdm_to_ardu->send(&pkt, sizeof(pkt));
+    ROS_INFO("neither");
 }
 
 } // end of "namespace gazebo"

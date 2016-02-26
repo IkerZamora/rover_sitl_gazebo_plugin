@@ -65,10 +65,12 @@ catkin_package(
 add_library(${PROJECT_NAME}
   src/VehiclePlugin.cc
   src/vehicle_plugin_apm_side.cc
+  src/SocketAPM.cc
   src/vehicle_plugin_gazebo_side.cc
   src/vehicle_plugin_ros_side.cc
-  src/SocketAPM.cc
 )
+#
+#
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)

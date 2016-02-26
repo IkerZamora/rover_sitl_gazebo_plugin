@@ -74,12 +74,6 @@ bool VehiclePlugin::init_ros_side()
     _motorSpd_publisher = _rosnode->advertise<mav_msgs::CommandMotorSpeed>(topicNameBuf.c_str(), 10);*/
     _motorSpd_publisher = _rosnode->advertise<geometry_msgs::Twist>("/rover/cmd_vel", 10);
 
-    //int argc = 0;
-    //ros::init(argc, NULL, "RoverPlugin");
-    //ros::NodeHandle n;
-    cmd_vel_sub = _rosnode->subscribe("/rover/cmd_vel", 10, &VehiclePlugin::OnVelMsg,this);
-    //printf("Subscribed to /rover/cmd_vel\n");    
-
 
     // Services
     /*_service_take_lapseLock    = _rosnode->advertiseService("take_apm_lapseLock",    &VehiclePlugin::service_take_lapseLock,    this);
@@ -254,23 +248,6 @@ void VehiclePlugin::sonar_front_callback(const sensor_msgs::Range &sonar_range_m
     _fdm_mutex.unlock();
 }
 #endif
-
-/////////////////////////////////////////////////
-void VehiclePlugin::OnVelMsg(const geometry_msgs::Twist& vel_cmd/*ConstPosePtr &_msg*/)
-{
-
-  //printf("MSG! Linear: %f, %f, %f | Angular: %f, %f, %f \n",vel_cmd.linear.x,vel_cmd.linear.y,vel_cmd.linear.z,vel_cmd.angular.x,vel_cmd.angular.y,vel_cmd.angular.z);
-  //double vel_lin = _msg->position().x() / this->wheelRadius;
-//  double vel_rot = -1 * msgs::Convert(_msg->orientation()).GetAsEuler().z
-//                   * (this->wheelSeparation / this->wheelRadius);
-
-  ROS_INFO( PLUGIN_LOG_PREPEND "I heard a vel_cmd msg"); 
-  this->gasJoint->SetVelocity(0, vel_cmd.linear.x);
-  //this->brakeJoint->SetForce(0, vel_cmd.linear.z);
-  this->steeringJoint->SetPosition(0, vel_cmd.angular.x);
-
-
-}
 
 //-------------------------------------------------
 //  ROS Topics Publishers

@@ -74,7 +74,7 @@ VehiclePlugin::VehiclePlugin()
   _fdm.position_latlonalt[1] = 0;
   _fdm.position_latlonalt[2] = 0;
   
-  //_fdm.sonar_down = 0;
+  _fdm.sonar_down = 0;
 #if SONAR_FRONT == ENABLED
   _fdm.sonar_front = 0;
 #endif
@@ -222,16 +222,22 @@ void VehiclePlugin::loop_thread()
               isConnectionAlive = true;
               ROS_INFO( PLUGIN_LOG_PREPEND "Connected with Ardupilot");
           }
-          
+
+          for (int i=0; i < 10000; i++){
+            ROS_INFO("%d.- Loop", i);
+          }
+
           // Advances the simulation by 1 step
           if (!_isSimPaused) {
               ROS_DEBUG(PLUGIN_LOG_PREPEND "step");
+              ROS_INFO("step");
               step_gazebo_sim();
               iLoopCounter++;
           }
-          
+          ROS_INFO("before send");
           // Returns the new state to ArduPilot
           send_apm_output();
+          ROS_INFO("after send");
       } else {
           // No message from Ardupilot on this loop, maybe next one ?
           if (isConnectionAlive) {

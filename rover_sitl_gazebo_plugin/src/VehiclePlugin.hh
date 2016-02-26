@@ -55,8 +55,8 @@
 #include "SocketAPM.hh"
 
 // Plugin's services
-#include "ardupilot_sitl_gazebo_plugin/TakeApmLapseLock.h"
-#include "ardupilot_sitl_gazebo_plugin/ReleaseApmLapseLock.h"
+#include "rover_sitl_gazebo_plugin/TakeApmLapseLock.h"
+#include "rover_sitl_gazebo_plugin/ReleaseApmLapseLock.h"
 
 // This plugin implements a thread, based on boost, for the communication with Ardupilot
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -111,8 +111,8 @@
 #define PLUGIN_LOG_PREPEND       "ROVER: "
 
 // Uncomment the following lines to activate some debug
-//#define DEBUG_DISP_GPS_POSITION
-//#define DEBUG_DISP_MOTORS_COMMANDS
+#define DEBUG_DISP_GPS_POSITION
+#define DEBUG_DISP_MOTORS_COMMANDS
 
 
 namespace gazebo
@@ -144,16 +144,16 @@ class VehiclePlugin : public WorldPlugin
     void imu_callback(const sensor_msgs::Imu &imu_msg);
     void gps_callback(const sensor_msgs::NavSatFix &gps_fix_msg);
     void gps_velocity_callback(const geometry_msgs::Vector3Stamped &gps_velocity_fix_msg);
-      void sonar_down_callback(const sensor_msgs::Range &sonar_range_msg);
+    void sonar_down_callback(const sensor_msgs::Range &sonar_range_msg);
   #if SONAR_FRONT == ENABLED
     void sonar_front_callback(const sensor_msgs::Range &sonar_range_msg);
   #endif
     
     // Services:
-    bool service_take_lapseLock(ardupilot_sitl_gazebo_plugin::TakeApmLapseLock::Request  &req,
-                                ardupilot_sitl_gazebo_plugin::TakeApmLapseLock::Response &res);
-    bool service_release_lapseLock(ardupilot_sitl_gazebo_plugin::ReleaseApmLapseLock::Request  &req,
-                                   ardupilot_sitl_gazebo_plugin::ReleaseApmLapseLock::Response &res);
+    bool service_take_lapseLock(rover_sitl_gazebo_plugin::TakeApmLapseLock::Request  &req,
+                                rover_sitl_gazebo_plugin::TakeApmLapseLock::Response &res);
+    bool service_release_lapseLock(rover_sitl_gazebo_plugin::ReleaseApmLapseLock::Request  &req,
+                                   rover_sitl_gazebo_plugin::ReleaseApmLapseLock::Response &res);
 
   protected:
 
@@ -161,7 +161,7 @@ class VehiclePlugin : public WorldPlugin
       packet sent to ardupilot_sitl_gazebo
      */
     struct servo_packet {
-        float servos[16];    // ranges from 0 (no rotation) to 1 (full throttle)
+        float servos[NB_SERVOS];    // ranges from 0 (no rotation) to 1 (full throttle)
     };
 
     /*
@@ -234,17 +234,17 @@ class VehiclePlugin : public WorldPlugin
     //GAZEBO data
     gazebo::physics::WorldPtr   _parent_world;
     physics::ModelPtr _rover_model;
-    physics::LinkPtr chassis;
-    std::vector<physics::JointPtr> joints;
-    physics::JointPtr gasJoint, brakeJoint;
-    physics::JointPtr steeringJoint;
+    //physics::LinkPtr chassis;
+    //std::vector<physics::JointPtr> joints;
+    //physics::JointPtr gasJoint, brakeJoint;
+    //physics::JointPtr steeringJoint;
     sdf::ElementPtr             _sdf;
     transport::SubscriberPtr    _controlSub;      // Subscriber used to receive updates on world_control topic.
     transport::SubscriberPtr    _modelInfoSub;
 
     //GAZEBO transport data
     transport::NodePtr node;
-    transport::SubscriberPtr velSub;
+    //transport::SubscriberPtr velSub;
 
     bool                        _isSimPaused;     // Flag to hold the simulation (pause)
     bool                        _timeMsgAlreadyDisplayed;  // for debug of the time step
@@ -252,7 +252,7 @@ class VehiclePlugin : public WorldPlugin
     //ROS messages
     ros::NodeHandle* _rosnode;
     //---
-    ros::Subscriber cmd_vel_sub; //remove?
+    //ros::Subscriber cmd_vel_sub; //remove?
     //---
     ros::ServiceServer          _service_take_lapseLock;
     ros::ServiceServer          _service_release_lapseLock;
