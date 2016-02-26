@@ -120,20 +120,22 @@ ssize_t SocketAPM::recv(void *buf, size_t size, uint32_t timeout_ms)
     fd_set fds;
     struct timeval tv;
 
-    ROS_INFO("R1");
+    //ROS_INFO("R1");
     FD_ZERO(&fds);
-    ROS_INFO("R2");
+    //ROS_INFO("R2");
     FD_SET(fd, &fds);
-    ROS_INFO("R3");
+    //ROS_INFO("R3");
     tv.tv_sec = timeout_ms / 1000;
-    ROS_INFO("R4");
+    //ROS_INFO("R4");
     tv.tv_usec = (timeout_ms % 1000) * 1000UL;
-    ROS_INFO("R5");
+    //ROS_INFO("R5");
     if (select(fd+1, &fds, NULL, NULL, &tv) != 1) {
-    ROS_INFO("R6");
+    //ROS_INFO("R6");
+
         return -1;
     }
-    ROS_INFO("R7");
+    //ROS_INFO("R7");
+
     return ::recv(fd, buf, size, 0);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright (C) 2012-2014 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  *
 */
 
-#include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
 #include "RoverPlugin.hh"
@@ -35,33 +34,31 @@ VehiclePlugin::VehiclePlugin()
   this->frontPower = 50;
   this->rearPower = 50;
   this->wheelRadius = 0.3;
-
 }
 
 /////////////////////////////////////////////////
 void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-
-  printf("Plugin loaded!\n");
-
   this->model = _model;
-  //this->physics = this->model->GetWorld()->GetPhysicsEngine();
+  // this->physics = this->model->GetWorld()->GetPhysicsEngine();
 
-  this->joints[0] = this->model->GetJoint(_sdf->GetElement("front_left")->Get<std::string>());
+  this->joints[0] = this->model->GetJoint(_sdf->Get<std::string>("front_left"));
   if (!this->joints[0])
   {
     gzerr << "Unable to find joint: front_left\n";
     return;
   }
 
-  this->joints[1] = this->model->GetJoint(_sdf->GetElement("front_right")->Get<std::string>());
+  this->joints[1] = this->model->GetJoint(
+      _sdf->Get<std::string>("front_right"));
+
   if (!this->joints[1])
   {
     gzerr << "Unable to find joint: front_right\n";
     return;
   }
 
-  this->joints[2] = this->model->GetJoint(_sdf->GetElement("back_left")->Get<std::string>());
+  this->joints[2] = this->model->GetJoint(_sdf->Get<std::string>("back_left"));
   if (!this->joints[2])
   {
     gzerr << "Unable to find joint: back_left\n";
@@ -69,7 +66,7 @@ void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
 
-  this->joints[3] = this->model->GetJoint(_sdf->GetElement("back_right")->Get<std::string>());
+  this->joints[3] = this->model->GetJoint(_sdf->Get<std::string>("back_right"));
   if (!this->joints[3])
   {
     gzerr << "Unable to find joint: back_right\n";
@@ -88,57 +85,58 @@ void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->joints[3]->SetParam("suspension_erp", 0, 0.15);
   this->joints[3]->SetParam("suspension_cfm", 0, 0.04);
 
-  this->gasJoint = this->model->GetJoint(_sdf->GetElement("gas")->Get<std::string>());
-  this->brakeJoint = this->model->GetJoint(_sdf->GetElement("brake")->Get<std::string>());
-  this->steeringJoint = this->model->GetJoint(_sdf->GetElement("steering")->Get<std::string>());
+  this->gasJoint = this->model->GetJoint(_sdf->Get<std::string>("gas"));
+  this->brakeJoint = this->model->GetJoint(_sdf->Get<std::string>("brake"));
+  this->steeringJoint = this->model->GetJoint(
+      _sdf->Get<std::string>("steering"));
 
   if (!this->gasJoint)
   {
     gzerr << "Unable to find gas joint["
-          << _sdf->GetElement("gas")->Get<std::string>() << "]\n";
+          << _sdf->Get<std::string>("gas") << "]\n";
     return;
   }
 
   if (!this->steeringJoint)
   {
     gzerr << "Unable to find steering joint["
-          << _sdf->GetElement("steering")->Get<std::string>() << "]\n";
+          << _sdf->Get<std::string>("steering") << "]\n";
     return;
   }
 
   if (!this->joints[0])
   {
     gzerr << "Unable to find front_left joint["
-          << _sdf->GetElement("front_left")->Get<std::string>() << "]\n";
+          << _sdf->GetElement("front_left") << "]\n";
     return;
   }
 
   if (!this->joints[1])
   {
     gzerr << "Unable to find front_right joint["
-          << _sdf->GetElement("front_right")->Get<std::string>() << "]\n";
+          << _sdf->GetElement("front_right") << "]\n";
     return;
   }
 
   if (!this->joints[2])
   {
     gzerr << "Unable to find back_left joint["
-          << _sdf->GetElement("back_left")->Get<std::string>() << "]\n";
+          << _sdf->GetElement("back_left") << "]\n";
     return;
   }
 
   if (!this->joints[3])
   {
     gzerr << "Unable to find back_right joint["
-          << _sdf->GetElement("back_right")->Get<std::string>() << "]\n";
+          << _sdf->GetElement("back_right") << "]\n";
     return;
   }
 
-  this->maxSpeed = _sdf->GetElement("max_speed")->Get<double>();
-  this->aeroLoad = _sdf->GetElement("aero_load")->Get<double>();
-  this->tireAngleRange = _sdf->GetElement("tire_angle_range")->Get<double>();
-  this->frontPower = _sdf->GetElement("front_power")->Get<double>();
-  this->rearPower = _sdf->GetElement("rear_power")->Get<double>();
+  this->maxSpeed = _sdf->Get<double>("max_speed");
+  this->aeroLoad = _sdf->Get<double>("aero_load");
+  this->tireAngleRange = _sdf->Get<double>("tire_angle_range");
+  this->frontPower = _sdf->Get<double>("front_power");
+  this->rearPower = _sdf->Get<double>("rear_power");
 
   this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
           boost::bind(&VehiclePlugin::OnUpdate, this)));
@@ -146,15 +144,14 @@ void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->node = transport::NodePtr(new transport::Node());
   this->node->Init(this->model->GetWorld()->GetName());
 
-  cmd_vel_sub = _rosnode->subscribe("/rover/cmd_vel", 10, &VehiclePlugin::OnVelMsg,this);
+  //ros::init()
 
+  this->velSub = this->rosnode->subscribe("/rover/cmd_vel", 10, &VehiclePlugin::OnVelMsg,this);
 }
 
 /////////////////////////////////////////////////
 void VehiclePlugin::Init()
 {
-
-
   this->chassis = this->joints[0]->GetParent();
 
   // This assumes that the largest dimension of the wheel is the diameter
@@ -203,17 +200,17 @@ void VehiclePlugin::OnUpdate()
                     this->wheelRadius;
 
   // Set velocity and max force for each wheel
-  this->joints[0]->SetVelocity(1, -jointVel);
-  this->joints[0]->SetParam("max_force", 1, (gas + brake) * this->frontPower);
+  this->joints[0]->SetVelocityLimit(1, -jointVel);
+  this->joints[0]->SetForce(1, (gas + brake) * this->frontPower);
 
-  this->joints[1]->SetVelocity(1, -jointVel);
-  this->joints[1]->SetParam("max_force", 1, (gas + brake) * this->frontPower);
+  this->joints[1]->SetVelocityLimit(1, -jointVel);
+  this->joints[1]->SetForce(1, (gas + brake) * this->frontPower);
 
-  this->joints[2]->SetVelocity(1, -jointVel);
-  this->joints[2]->SetParam("max_force", 2, (gas + brake) * this->rearPower);
+  this->joints[2]->SetVelocityLimit(1, -jointVel);
+  this->joints[2]->SetForce(1, (gas + brake) * this->rearPower);
 
-  this->joints[3]->SetVelocity(1, -jointVel);
-  this->joints[3]->SetParam("max_force", 3, (gas + brake) * this->rearPower);
+  this->joints[3]->SetVelocityLimit(1, -jointVel);
+  this->joints[3]->SetForce(1, (gas + brake) * this->rearPower);
 
   // Set the front-left wheel angle
   this->joints[0]->SetLowStop(0, wheelAngle);
@@ -239,15 +236,13 @@ void VehiclePlugin::OnUpdate()
   math::Vector3 hingePoint;
   math::Vector3 axis;
 
-  double displacement;
-
   for (int ix = 0; ix < 4; ++ix)
   {
     hingePoint = this->joints[ix]->GetAnchor(0);
     bodyPoint = this->joints[ix]->GetAnchor(1);
 
     axis = this->joints[ix]->GetGlobalAxis(0).Round();
-    displacement = (bodyPoint - hingePoint).Dot(axis);
+    double displacement = (bodyPoint - hingePoint).Dot(axis);
 
     float amt = displacement * this->swayForce;
     if (displacement > 0)
@@ -267,18 +262,8 @@ void VehiclePlugin::OnUpdate()
 }
 
 /////////////////////////////////////////////////
-void VehiclePlugin::OnVelMsg(const geometry_msgs::Twist& vel_cmd)
+void VehiclePlugin::OnVelMsg(const geometry_msgs::Twist vel_cmd)
 {
-
-  //printf("MSG! Linear: %f, %f, %f | Angular: %f, %f, %f \n",vel_cmd.linear.x,vel_cmd.linear.y,vel_cmd.linear.z,vel_cmd.angular.x,vel_cmd.angular.y,vel_cmd.angular.z);
-  //double vel_lin = _msg->position().x() / this->wheelRadius;
-//  double vel_rot = -1 * msgs::Convert(_msg->orientation()).GetAsEuler().z
-//                   * (this->wheelSeparation / this->wheelRadius);
-
-  //ROS_INFO( PLUGIN_LOG_PREPEND "I heard a vel_cmd msg"); 
   this->gasJoint->SetVelocity(0, vel_cmd.linear.x);
-  //this->brakeJoint->SetForce(0, vel_cmd.linear.z);
   this->steeringJoint->SetPosition(0, vel_cmd.angular.x);
-
-
 }

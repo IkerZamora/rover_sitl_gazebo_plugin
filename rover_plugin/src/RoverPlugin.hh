@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright (C) 2012-2014 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,22 @@
  * Author: Nate Koenig
  */
 
-#ifndef __GAZEBO_VEHICLE_PLUGIN_HH__
-#define __GAZEBO_VEHICLE_PLUGIN_HH__
+#ifndef _GAZEBO_VEHICLE_PLUGIN_HH_
+#define _GAZEBO_VEHICLE_PLUGIN_HH_
 
 #include <string>
 #include <vector>
 
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/transport.hh>
+#include <gazebo/util/system.hh>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 
-#include <sdf/sdf.hh>
-
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/msgs/msgs.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/transport/transport.hh>
-
-
-
 namespace gazebo
 {
-  class VehiclePlugin : public ModelPlugin
+  class GAZEBO_VISIBLE VehiclePlugin : public ModelPlugin
   {
     /// \brief Constructor
     public: VehiclePlugin();
@@ -50,7 +43,7 @@ namespace gazebo
 
     private: void OnUpdate();
 
-    private: void OnVelMsg(const geometry_msgs::Twist& vel_cmd);
+    private: void OnVelMsg(const geometry_msgs::Twist vel_cmd);
 
     private: std::vector<event::ConnectionPtr> connections;
 
@@ -63,10 +56,9 @@ namespace gazebo
     private: math::Vector3 velocity;
 
     private: transport::NodePtr node;
-    private: transport::SubscriberPtr velSub;
 
-    private: ros::NodeHandle* _rosnode;
-    private: ros::Subscriber cmd_vel_sub;
+    private: ros::NodeHandle* rosnode;
+    private: ros::Subscriber velSub;
 
     private: double frontPower, rearPower;
     private: double maxSpeed;
