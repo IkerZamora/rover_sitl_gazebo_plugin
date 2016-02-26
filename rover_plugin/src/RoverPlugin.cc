@@ -144,7 +144,8 @@ void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->node = transport::NodePtr(new transport::Node());
   this->node->Init(this->model->GetWorld()->GetName());
 
-  //ros::init()
+  int argc = 0;
+  ros::init(argc, NULL, "rover");
 
   this->velSub = this->rosnode->subscribe("/rover/cmd_vel", 10, &VehiclePlugin::OnVelMsg,this);
 }
