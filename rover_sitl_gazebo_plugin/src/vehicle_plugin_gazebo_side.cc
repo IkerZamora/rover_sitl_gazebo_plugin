@@ -46,14 +46,19 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     // Saves pointers to the parent world
     _parent_world = world;
     _sdf = sdf;
-    _parent_world->InsertModelFile("model://rover");
-    if (!world->GetModel("rover")){
-        gzerr << "Unable to find rover model. There are " << _parent_world->GetModelCount() << " models.\n";
-        return false;
-    }
-    _rover_model = world->GetModel("rover");
-    // Setup Gazebo node infrastructure
 
+    // Pause de simulation until rover model is inserted
+    ROS_INFO("Waiting for rover model to be inseted...");
+    _parent_world->SetPaused(true);
+    while (!world->GetModel("rover")){
+        continue;
+    }
+    ROS_INFO("Rover model inserted!");
+    _rover_model = world->GetModel("rover");
+    _parent_world->SetPaused(false);
+
+
+    // Setup Gazebo node infrastructure
     if (_sdf->HasElement("UAV_MODEL"))
         _modelName = _sdf->Get<std::string>("UAV_MODEL");
     //if (_sdf->HasElement("NB_SERVOS_MOTOR_SPEED"))
@@ -94,7 +99,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     this->joints[2] = _rover_model->GetJoint(_sdf->Get<std::string>("back_left"));
     if (!this->joints[2])
     {
-    gzerr << "Unable to find joint: back_left\n";
+    gzerr << "Unable to find joint: back_left_joint\n";
     return false;
     }
 
@@ -102,7 +107,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     this->joints[3] = _rover_model->GetJoint(_sdf->Get<std::string>("back_right"));
     if (!this->joints[3])
     {
-    gzerr << "Unable to find joint: back_right\n";
+    gzerr << "Unable to find joint: back_right_joint\n";
     return false;
     }
 
@@ -165,7 +170,6 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     return false;
     }
 
-    ROS_INFO("Joint stuff done");
 
     this->maxSpeed = _sdf->Get<double>("max_speed");
     this->aeroLoad = _sdf->Get<double>("aero_load");
@@ -173,34 +177,20 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     this->frontPower = _sdf->Get<double>("front_power");
     this->rearPower = _sdf->Get<double>("rear_power");
 
-    ROS_INFO("Parameters initialized");
-
     this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
           boost::bind(&VehiclePlugin::on_gazebo_update, this)));
 
-    ROS_INFO("push_back initialized");
-
     this->node = transport::NodePtr(new transport::Node());
 
-    ROS_INFO("transport node created");
-
     this->node->Init(_rover_model->GetWorld()->GetName());
-
-    ROS_INFO("transport node initialized");
 
     int argc = 0;
     ros::init(argc, NULL, "rover_model_plugin");
 
-    ROS_INFO("ros initialized");
-
     //ros::NodeHandle rosnode;
     //this->velSub = _rosnode.subscribe("/rover/cmd_vel", 100, &VehiclePlugin::OnVelMsg, this);
 
-    ROS_INFO("Model plugin loaded...");
-
     // FROM MODEL PLUGIN Init()
-
-    ROS_INFO("Initializing model plugin...");
 
     this->chassis = this->joints[0]->GetParent();
 
@@ -224,7 +214,6 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     this->maxBrake = this->gasJoint->GetHighStop(0).Radian();
 
     printf("SteeringRation[%f] MaxGa[%f]\n", this->steeringRatio, this->maxGas);
-    ROS_INFO("Model plugin initialized");
 
     //-------------------------------------------------
 
@@ -260,6 +249,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     // Or we could also use 'ConnectWorldUpdateBegin'
     // For a list of all available connection events, see: Gazebo-X.X/gazebo/common/Events.hh 
     
+    ROS_INFO("Gazebo side initialized");
     return true;
 }
 

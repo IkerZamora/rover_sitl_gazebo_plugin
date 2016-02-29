@@ -25,6 +25,7 @@
 //Standard includes
 #include <string>
 #include <vector>
+#include <thread>
 
 //Gazebo includes
 #include <gazebo/common/common.hh>

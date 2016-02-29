@@ -13,12 +13,24 @@
     </include>
 
 
-    <!--<include>
+    <include>
         <uri>model://rover</uri>
-    </include>-->
+    </include>
 
     <plugin name="rover_sitl_gazebo_plugin" filename=" librover_sitl_gazebo_plugin.so">
       <UAV_MODEL>rover</UAV_MODEL>
+      <front_left>rover::front_left_joint</front_left>
+      <front_right>rover::front_right_joint</front_right>
+      <back_left>rover::back_left_joint</back_left>
+      <back_right>rover::back_right_joint</back_right>
+      <gas>rover::gas_joint</gas>
+      <brake>rover::brake_joint</brake>
+      <steering>rover::steering_joint</steering>
+      <front_power>10</front_power>
+      <rear_power>10</rear_power>
+      <tire_angle_range>0.5</tire_angle_range>
+      <max_speed>10</max_speed>
+      <aero_load>0.1</aero_load>
     </plugin>
 
   </world>

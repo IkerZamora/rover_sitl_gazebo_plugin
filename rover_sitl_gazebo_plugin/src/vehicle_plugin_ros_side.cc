@@ -81,7 +81,7 @@ bool VehiclePlugin::init_ros_side()
     _service_release_lapseLock = _rosnode->advertiseService("release_apm_lapseLock", &VehiclePlugin::service_release_lapseLock, this);
     ROS_INFO( PLUGIN_LOG_PREPEND "Services declared !");*/
     
-    ROS_INFO( PLUGIN_LOG_PREPEND "ROS side initialized !");  
+    ROS_INFO( PLUGIN_LOG_PREPEND "ROS side initialized");  
     
     return true;
 }

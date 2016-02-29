@@ -39,7 +39,7 @@ bool VehiclePlugin::init_ardupilot_side()
     open_control_socket();
     open_fdm_socket();
 
-    ROS_INFO( PLUGIN_LOG_PREPEND "APM/Ardupilot side initialized !"); 
+    ROS_INFO( PLUGIN_LOG_PREPEND "APM/Ardupilot side initialized"); 
 
     return true;
 }
@@ -114,7 +114,6 @@ bool VehiclePlugin::receive_apm_input()
         ROS_INFO( PLUGIN_LOG_PREPEND "Cannot receive input from Ardu, for the port is not open !");
         return false;
     }
-    ROS_INFO("first");
     szRecv = _sock_control_from_ardu->recv(&pkt, sizeof(pkt), 100);
     ROS_INFO("recv = %zd", szRecv);
     // Expects a servo control packet
