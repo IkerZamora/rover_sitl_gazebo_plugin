@@ -173,19 +173,21 @@ void VehiclePlugin::loop_thread()
   // Keeps running while ROS is on
   while (_rosnode->ok()) {
 
-      //ROS_INFO("iLoopCounter = %d", iLoopCounter);
+      ROS_INFO("iLoopCounter = %d", iLoopCounter);
 
       // Slow down your horses !
       boost::this_thread::sleep(thread_delay);
 
-      //ROS_INFO("slow");
+      for (int i = 0; i < 10000; i++) ROS_INFO("%d.- loop", i);
+
+      ROS_INFO("slow");
       
       // Notes the start time, calculates the loop duration
       prevloop_t_start = loop_t_start;
       loop_t_start = ros::WallTime::now();
       loop_dt = loop_t_start - prevloop_t_start;
 
-      //ROS_INFO("time");
+      ROS_INFO("time");
 
       /*if (loop_dt.toSec() < STEP_SIZE_FOR_ARDUPILOT) {
          ROS_INFO( PLUGIN_LOG_PREPEND "Wait %f", STEP_SIZE_FOR_ARDUPILOT - loop_dt.toSec());
@@ -194,7 +196,7 @@ void VehiclePlugin::loop_thread()
 
       //iLoopCounter++;
       if (iLoopCounter >= nbSteps) {
-          //ROS_INFO("nb");
+          ROS_INFO("nb");
           iLoopCounter = 0;
           prevloop10_t_start = loop10_t_start;
           loop10_t_start = ros::WallTime::now();
@@ -205,18 +207,18 @@ void VehiclePlugin::loop_thread()
           }
       }
   
-      //ROS_INFO("steps");
+      ROS_INFO("steps");
 
       // Checks if there is a lapse lock. If yes, waits until the other task frees it, or until the lock expires
       if (!check_lapseLock(loop_dt.toSec())) {
           continue;
       }
       
-      //ROS_INFO("check");
+      ROS_INFO("check");
 
       // Checks the inbox for any email from Ardupilot
       if (receive_apm_input()) {
-          //ROS_INFO("input");
+          ROS_INFO("input");
           // We have a friend !
           if (!isConnectionAlive) {
               isConnectionAlive = true;
@@ -230,14 +232,14 @@ void VehiclePlugin::loop_thread()
           // Advances the simulation by 1 step
           if (!_isSimPaused) {
               ROS_DEBUG(PLUGIN_LOG_PREPEND "step");
-              //ROS_INFO("step");
+              ROS_INFO("step");
               step_gazebo_sim();
               iLoopCounter++;
           }
-          //ROS_INFO("before send");
+          ROS_INFO("before send");
           // Returns the new state to ArduPilot
           send_apm_output();
-          //ROS_INFO("after send");
+          ROS_INFO("after send");
       } else {
           // No message from Ardupilot on this loop, maybe next one ?
           if (isConnectionAlive) {

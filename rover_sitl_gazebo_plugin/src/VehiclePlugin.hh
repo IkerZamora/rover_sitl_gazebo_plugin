@@ -50,6 +50,7 @@
 #include <sensor_msgs/NavSatFix.h>          // for the GPS fix
 #include <geometry_msgs/Vector3Stamped.h>   // for the GPS velocity fix
 #include <std_msgs/Empty.h>
+#include <geometry_msgs/Twist.h>
 
 //Plugin's inner headers
 #include "SocketAPM.hh"
@@ -148,6 +149,8 @@ class VehiclePlugin : public WorldPlugin
   #if SONAR_FRONT == ENABLED
     void sonar_front_callback(const sensor_msgs::Range &sonar_range_msg);
   #endif
+
+    //void OnVelMsg(const geometry_msgs::Twist &vel_cmd);
     
     // Services:
     bool service_take_lapseLock(rover_sitl_gazebo_plugin::TakeApmLapseLock::Request  &req,
@@ -198,7 +201,7 @@ class VehiclePlugin : public WorldPlugin
 
     // callback methods
     void OnUpdate();
-    void OnVelMsg(const geometry_msgs::Twist& vel_cmd/*ConstPosePtr &_msg*/);
+    void OnVelMsg(const geometry_msgs::Twist vel_cmd/*ConstPosePtr &_msg*/);
 
 
     // ARDUPILOT related methods
@@ -234,6 +237,25 @@ class VehiclePlugin : public WorldPlugin
     //GAZEBO data
     gazebo::physics::WorldPtr   _parent_world;
     physics::ModelPtr _rover_model;
+    physics::LinkPtr chassis;
+    std::vector<physics::JointPtr> joints;
+    physics::JointPtr gasJoint, brakeJoint;
+    physics::JointPtr steeringJoint;
+
+    math::Vector3 velocity;
+
+    ros::Subscriber velSub;
+
+    double frontPower, rearPower;
+    double maxSpeed;
+    double wheelRadius;
+
+    double steeringRatio;
+    double tireAngleRange;
+    double maxGas, maxBrake;
+
+    double aeroLoad;
+    double swayForce;
     //physics::LinkPtr chassis;
     //std::vector<physics::JointPtr> joints;
     //physics::JointPtr gasJoint, brakeJoint;
@@ -279,20 +301,6 @@ class VehiclePlugin : public WorldPlugin
     ros::Time                   _last_write_sim_time_ros;
     
     event::ConnectionPtr        _updateConnection;
-
-    //Vehicle parameters
-    math::Vector3 velocity;
-
-    double frontPower, rearPower;
-    double maxSpeed;
-    double wheelRadius;
-
-    double steeringRatio;
-    double tireAngleRange;
-    double maxGas, maxBrake;
-
-    double aeroLoad;
-    double swayForce;
 
 
     float                       _loop_lapseLock;            // [s] blocks the main loop until release (-> 0), or if the timer is elapsed

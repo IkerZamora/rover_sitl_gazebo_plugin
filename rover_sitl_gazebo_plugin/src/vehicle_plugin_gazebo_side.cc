@@ -46,7 +46,12 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     // Saves pointers to the parent world
     _parent_world = world;
     _sdf = sdf;
-    
+    _parent_world->InsertModelFile("model://rover");
+    if (!world->GetModel("rover")){
+        gzerr << "Unable to find rover model. There are " << _parent_world->GetModelCount() << " models.\n";
+        return false;
+    }
+    _rover_model = world->GetModel("rover");
     // Setup Gazebo node infrastructure
 
     if (_sdf->HasElement("UAV_MODEL"))
@@ -55,6 +60,174 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     //   _nbMotorSpeed = _sdf->Get<int>("NB_SERVOS_MOTOR_SPEED");
     ROS_INFO("Model name:      %s", _modelName.c_str());
     //ROS_INFO("Nb motor servos: %d", _nbMotorSpeed);
+
+
+    // FROM MODEL PLUGIN CONSTRUCTOR
+    this->joints.resize(4);
+
+    this->aeroLoad = 0.1;
+    this->swayForce = 10;
+
+    this->maxSpeed = 10;
+    this->frontPower = 50;
+    this->rearPower = 50;
+    this->wheelRadius = 0.3;
+
+    // FROM MODEL PLUGIN Load()
+    this->joints[0] = _rover_model->GetJoint(_sdf->Get<std::string>("front_left"));
+    if (!this->joints[0])
+    {
+    gzerr << "Unable to find joint: front_left\n";
+    ROS_INFO("Unable to find joint: front_left");
+    return false;
+    }
+    ROS_INFO("front_left joint found");
+    this->joints[1] = _rover_model->GetJoint(
+      _sdf->Get<std::string>("front_right"));
+
+    if (!this->joints[1])
+    {
+    gzerr << "Unable to find joint: front_right\n";
+    return false;
+    }
+
+    this->joints[2] = _rover_model->GetJoint(_sdf->Get<std::string>("back_left"));
+    if (!this->joints[2])
+    {
+    gzerr << "Unable to find joint: back_left\n";
+    return false;
+    }
+
+
+    this->joints[3] = _rover_model->GetJoint(_sdf->Get<std::string>("back_right"));
+    if (!this->joints[3])
+    {
+    gzerr << "Unable to find joint: back_right\n";
+    return false;
+    }
+
+    this->joints[0]->SetParam("suspension_erp", 0, 0.15);
+    this->joints[0]->SetParam("suspension_cfm", 0, 0.04);
+
+    this->joints[1]->SetParam("suspension_erp", 0, 0.15);
+    this->joints[1]->SetParam("suspension_cfm", 0, 0.04);
+
+    this->joints[2]->SetParam("suspension_erp", 0, 0.15);
+    this->joints[2]->SetParam("suspension_cfm", 0, 0.04);
+
+    this->joints[3]->SetParam("suspension_erp", 0, 0.15);
+    this->joints[3]->SetParam("suspension_cfm", 0, 0.04);
+
+    this->gasJoint = _rover_model->GetJoint(_sdf->Get<std::string>("gas"));
+    this->brakeJoint = _rover_model->GetJoint(_sdf->Get<std::string>("brake"));
+    this->steeringJoint = _rover_model->GetJoint(
+      _sdf->Get<std::string>("steering"));
+
+    if (!this->gasJoint)
+    {
+    gzerr << "Unable to find gas joint["
+          << _sdf->Get<std::string>("gas") << "]\n";
+    return false;
+    }
+
+    if (!this->steeringJoint)
+    {
+    gzerr << "Unable to find steering joint["
+          << _sdf->Get<std::string>("steering") << "]\n";
+    return false;
+    }
+
+    if (!this->joints[0])
+    {
+    gzerr << "Unable to find front_left joint["
+          << _sdf->GetElement("front_left") << "]\n";
+    return false;
+    }
+
+    if (!this->joints[1])
+    {
+    gzerr << "Unable to find front_right joint["
+          << _sdf->GetElement("front_right") << "]\n";
+    return false;
+    }
+
+    if (!this->joints[2])
+    {
+    gzerr << "Unable to find back_left joint["
+          << _sdf->GetElement("back_left") << "]\n";
+    return false;
+    }
+
+    if (!this->joints[3])
+    {
+    gzerr << "Unable to find back_right joint["
+          << _sdf->GetElement("back_right") << "]\n";
+    return false;
+    }
+
+    ROS_INFO("Joint stuff done");
+
+    this->maxSpeed = _sdf->Get<double>("max_speed");
+    this->aeroLoad = _sdf->Get<double>("aero_load");
+    this->tireAngleRange = _sdf->Get<double>("tire_angle_range");
+    this->frontPower = _sdf->Get<double>("front_power");
+    this->rearPower = _sdf->Get<double>("rear_power");
+
+    ROS_INFO("Parameters initialized");
+
+    this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
+          boost::bind(&VehiclePlugin::on_gazebo_update, this)));
+
+    ROS_INFO("push_back initialized");
+
+    this->node = transport::NodePtr(new transport::Node());
+
+    ROS_INFO("transport node created");
+
+    this->node->Init(_rover_model->GetWorld()->GetName());
+
+    ROS_INFO("transport node initialized");
+
+    int argc = 0;
+    ros::init(argc, NULL, "rover_model_plugin");
+
+    ROS_INFO("ros initialized");
+
+    //ros::NodeHandle rosnode;
+    //this->velSub = _rosnode.subscribe("/rover/cmd_vel", 100, &VehiclePlugin::OnVelMsg, this);
+
+    ROS_INFO("Model plugin loaded...");
+
+    // FROM MODEL PLUGIN Init()
+
+    ROS_INFO("Initializing model plugin...");
+
+    this->chassis = this->joints[0]->GetParent();
+
+    // This assumes that the largest dimension of the wheel is the diameter
+    physics::EntityPtr parent = boost::dynamic_pointer_cast<physics::Entity>(
+      this->joints[0]->GetChild());
+    math::Box bb = parent->GetBoundingBox();
+    this->wheelRadius = bb.GetSize().GetMax() * 0.5;
+
+    // The total range the steering wheel can rotate
+    double steeringRange = this->steeringJoint->GetHighStop(0).Radian() -
+    this->steeringJoint->GetLowStop(0).Radian();
+
+    // Compute the angle ratio between the steering wheel and the tires
+    this->steeringRatio = steeringRange / this->tireAngleRange;
+
+    // Maximum gas is the upper limit of the gas joint
+    this->maxGas = this->gasJoint->GetHighStop(0).Radian();
+
+    // Maximum brake is the upper limit of the gas joint
+    this->maxBrake = this->gasJoint->GetHighStop(0).Radian();
+
+    printf("SteeringRation[%f] MaxGa[%f]\n", this->steeringRatio, this->maxGas);
+    ROS_INFO("Model plugin initialized");
+
+    //-------------------------------------------------
+
 
     // 'transport' is the communication library of Gazebo. It handles publishers
     // and subscribers.
@@ -127,6 +300,90 @@ void VehiclePlugin::on_gazebo_update()
         ROS_INFO( PLUGIN_LOG_PREPEND "Simulation step size is = %f", _parent_world->GetPhysicsEngine()->GetMaxStepSize());
         _timeMsgAlreadyDisplayed = true;
     }
+
+    // MODEL PLUGIN STUFF
+
+    // Get the normalized gas and brake amount
+    double gas = this->gasJoint->GetAngle(0).Radian() / this->maxGas;
+    double brake = this->brakeJoint->GetAngle(0).Radian() / this->maxBrake;
+
+    // A little force to push back on the pedals
+    this->gasJoint->SetForce(0, -0.1);
+    this->brakeJoint->SetForce(0, -0.1);
+
+    // Get the steering angle
+    double steeringAngle = this->steeringJoint->GetAngle(0).Radian();
+
+    // Compute the angle of the front wheels.
+    double wheelAngle = steeringAngle / this->steeringRatio;
+
+    // double idleSpeed = 0.5;
+
+    // Compute the rotational velocity of the wheels
+    double jointVel = (std::max(0.0, gas-brake) * this->maxSpeed) /
+                this->wheelRadius;
+
+    // Set velocity and max force for each wheel
+    this->joints[0]->SetVelocityLimit(1, -jointVel);
+    this->joints[0]->SetForce(1, (gas + brake) * this->frontPower);
+
+    this->joints[1]->SetVelocityLimit(1, -jointVel);
+    this->joints[1]->SetForce(1, (gas + brake) * this->frontPower);
+
+    this->joints[2]->SetVelocityLimit(1, -jointVel);
+    this->joints[2]->SetForce(1, (gas + brake) * this->rearPower);
+
+    this->joints[3]->SetVelocityLimit(1, -jointVel);
+    this->joints[3]->SetForce(1, (gas + brake) * this->rearPower);
+
+    // Set the front-left wheel angle
+    this->joints[0]->SetLowStop(0, wheelAngle);
+    this->joints[0]->SetHighStop(0, wheelAngle);
+    this->joints[0]->SetLowStop(0, wheelAngle);
+    this->joints[0]->SetHighStop(0, wheelAngle);
+
+    // Set the front-right wheel angle
+    this->joints[1]->SetHighStop(0, wheelAngle);
+    this->joints[1]->SetLowStop(0, wheelAngle);
+    this->joints[1]->SetHighStop(0, wheelAngle);
+    this->joints[1]->SetLowStop(0, wheelAngle);
+
+    // Get the current velocity of the car
+    this->velocity = this->chassis->GetWorldLinearVel();
+
+    //  aerodynamics
+    this->chassis->AddForce(
+    math::Vector3(0, 0, this->aeroLoad * this->velocity.GetSquaredLength()));
+
+    // Sway bars
+    math::Vector3 bodyPoint;
+    math::Vector3 hingePoint;
+    math::Vector3 axis;
+
+    for (int ix = 0; ix < 4; ++ix)
+    {
+        hingePoint = this->joints[ix]->GetAnchor(0);
+        bodyPoint = this->joints[ix]->GetAnchor(1);
+
+        axis = this->joints[ix]->GetGlobalAxis(0).Round();
+        double displacement = (bodyPoint - hingePoint).Dot(axis);
+
+        float amt = displacement * this->swayForce;
+        if (displacement > 0)
+        {
+            if (amt > 15)
+            amt = 15;
+
+            math::Pose p = this->joints[ix]->GetChild()->GetWorldPose();
+            this->joints[ix]->GetChild()->AddForce(axis * -amt);
+            this->chassis->AddForceAtWorldPosition(axis * amt, p.pos);
+
+            p = this->joints[ix^1]->GetChild()->GetWorldPose();
+            this->joints[ix^1]->GetChild()->AddForce(axis * amt);
+            this->chassis->AddForceAtWorldPosition(axis * -amt, p.pos);
+        }
+    }
+
 }
     
 /*
@@ -175,5 +432,7 @@ void VehiclePlugin::on_gazebo_modelInfo(ConstModelPtr &_msg)
     }
 }
 */
+
+
 
 } // end of "namespace gazebo"

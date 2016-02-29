@@ -74,6 +74,7 @@ bool VehiclePlugin::init_ros_side()
     _motorSpd_publisher = _rosnode->advertise<mav_msgs::CommandMotorSpeed>(topicNameBuf.c_str(), 10);*/
     _motorSpd_publisher = _rosnode->advertise<geometry_msgs::Twist>("/rover/cmd_vel", 10);
 
+    this->velSub = _rosnode->subscribe("/rover/cmd_vel", 100, &VehiclePlugin::OnVelMsg, this);
 
     // Services
     /*_service_take_lapseLock    = _rosnode->advertiseService("take_apm_lapseLock",    &VehiclePlugin::service_take_lapseLock,    this);
@@ -299,6 +300,13 @@ void VehiclePlugin::publish_commandMotorSpeed()
                   _cmd_motor_speed[1], _cmd_motor_speed[2], _cmd_motor_speed[3]);
         }
     #endif // DEBUG_DISP_MOTORS_COMMANDS*/
+}
+
+/////////////////////////////////////////////////
+void VehiclePlugin::OnVelMsg(const geometry_msgs::Twist vel_cmd)
+{
+  this->gasJoint->SetVelocity(0, vel_cmd.linear.x);
+  this->steeringJoint->SetPosition(0, vel_cmd.angular.x);
 }
 
 } // end of "namespace gazebo"
