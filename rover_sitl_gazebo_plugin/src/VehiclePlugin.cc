@@ -173,7 +173,7 @@ void VehiclePlugin::loop_thread()
   // Keeps running while ROS is on
   while (_rosnode->ok()) {
 
-      ROS_INFO("iLoopCounter = %d", iLoopCounter);
+      //ROS_INFO("iLoopCounter = %d", iLoopCounter);
 
       // Slow down your horses !
       boost::this_thread::sleep(thread_delay);

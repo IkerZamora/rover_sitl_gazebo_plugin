@@ -38,12 +38,12 @@ namespace gazebo
     /// \brief Constructor
     public: VehiclePlugin();
 
-    public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-    public: virtual void Init();
+    public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+    public: void Init();
 
-    private: void OnUpdate();
+    public: void OnUpdate();
 
-    private: void OnVelMsg(const geometry_msgs::Twist vel_cmd);
+    public: void OnVelMsg(const geometry_msgs::Twist vel_cmd);
 
     private: std::vector<event::ConnectionPtr> connections;
 
@@ -57,7 +57,6 @@ namespace gazebo
 
     private: transport::NodePtr node;
 
-    private: ros::NodeHandle* rosnode;
     private: ros::Subscriber velSub;
 
     private: double frontPower, rearPower;

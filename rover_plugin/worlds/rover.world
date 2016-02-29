@@ -17,9 +17,5 @@
         <uri>model://rover</uri>
     </include>
 
-    <plugin name="rover_sitl_gazebo_plugin" filename=" librover_sitl_gazebo_plugin.so">
-      <UAV_MODEL>rover</UAV_MODEL>
-    </plugin>
-
   </world>
 </sdf>

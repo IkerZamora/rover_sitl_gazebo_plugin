@@ -39,16 +39,19 @@ VehiclePlugin::VehiclePlugin()
 /////////////////////////////////////////////////
 void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
+  ROS_INFO("Loading model plugin...");
   this->model = _model;
+  ROS_INFO("this->model = _model;");
   // this->physics = this->model->GetWorld()->GetPhysicsEngine();
 
   this->joints[0] = this->model->GetJoint(_sdf->Get<std::string>("front_left"));
   if (!this->joints[0])
   {
     gzerr << "Unable to find joint: front_left\n";
+    ROS_INFO("Unable to find joint: front_left");
     return;
   }
-
+  ROS_INFO("front_left joint found");
   this->joints[1] = this->model->GetJoint(
       _sdf->Get<std::string>("front_right"));
 
@@ -132,27 +135,46 @@ void VehiclePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     return;
   }
 
+  ROS_INFO("Joint stuff done");
+
   this->maxSpeed = _sdf->Get<double>("max_speed");
   this->aeroLoad = _sdf->Get<double>("aero_load");
   this->tireAngleRange = _sdf->Get<double>("tire_angle_range");
   this->frontPower = _sdf->Get<double>("front_power");
   this->rearPower = _sdf->Get<double>("rear_power");
 
+  ROS_INFO("Parameters initialized");
+
   this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
           boost::bind(&VehiclePlugin::OnUpdate, this)));
 
+  ROS_INFO("push_back initialized");
+
   this->node = transport::NodePtr(new transport::Node());
+
+  ROS_INFO("transport node created");
+
   this->node->Init(this->model->GetWorld()->GetName());
 
-  int argc = 0;
-  ros::init(argc, NULL, "rover");
+  ROS_INFO("transport node initialized");
 
-  this->velSub = this->rosnode->subscribe("/rover/cmd_vel", 10, &VehiclePlugin::OnVelMsg,this);
+  int argc = 0;
+  ros::init(argc, NULL, "rover_model_plugin");
+
+  ROS_INFO("ros initialized");
+
+  ros::NodeHandle rosnode;
+  this->velSub = rosnode.subscribe("/rover/cmd_vel", 100, &VehiclePlugin::OnVelMsg, this);
+
+  ROS_INFO("Model plugin loaded...");
+
 }
 
 /////////////////////////////////////////////////
 void VehiclePlugin::Init()
 {
+  ROS_INFO("Initializing model plugin...");
+
   this->chassis = this->joints[0]->GetParent();
 
   // This assumes that the largest dimension of the wheel is the diameter
@@ -175,6 +197,8 @@ void VehiclePlugin::Init()
   this->maxBrake = this->gasJoint->GetHighStop(0).Radian();
 
   printf("SteeringRation[%f] MaxGa[%f]\n", this->steeringRatio, this->maxGas);
+  ROS_INFO("Model plugin initialized");
+
 }
 
 /////////////////////////////////////////////////
