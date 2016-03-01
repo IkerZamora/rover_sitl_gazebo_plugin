@@ -22,14 +22,14 @@
 #include <geometry_msgs/Twist.h>
 #include <ros/ros.h>
 
-#include "VehiclePlugin.hh"
+#include "rover_sitl_gazebo_plugin.hh"
 
 //using namespace gazebo;
 namespace gazebo{
-GZ_REGISTER_WORLD_PLUGIN(VehiclePlugin)
+GZ_REGISTER_WORLD_PLUGIN(RoverSitlGazeboPlugin)
 
 /////////////////////////////////////////////////
-VehiclePlugin::VehiclePlugin() 
+RoverSitlGazeboPlugin::RoverSitlGazeboPlugin() 
   : WorldPlugin(),
     _is_control_socket_open(false),
     _is_fdm_socket_open(false),
@@ -92,7 +92,7 @@ VehiclePlugin::VehiclePlugin()
 
 }
 
-VehiclePlugin::~VehiclePlugin()
+RoverSitlGazeboPlugin::~RoverSitlGazeboPlugin()
 {
   // Gazebo pointers (to world/model/joint/...) are based on Boost shared pointers.
   // To pass them to NULL, the 'reset()' method must be used.
@@ -121,7 +121,7 @@ VehiclePlugin::~VehiclePlugin()
 }
 
 /////////////////////////////////////////////////
-void VehiclePlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf)
+void RoverSitlGazeboPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf)
 {
   // Calls every initialization method. They will return 'false' in case of
   // fatal failure.
@@ -138,7 +138,7 @@ void VehiclePlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf)
   ROS_INFO( PLUGIN_LOG_PREPEND "Initialization finished. Every side has been initialized.");
   
   // Starts the loop thread
-  _callback_loop_thread = boost::thread( boost::bind( &VehiclePlugin::loop_thread,this ) );
+  _callback_loop_thread = boost::thread( boost::bind( &RoverSitlGazeboPlugin::loop_thread,this ) );
   
 }
 
@@ -146,7 +146,7 @@ void VehiclePlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf)
   Main loop of the plugin.
   Handles the whole Gazebo / Ardupilot synchronisation
 */
-void VehiclePlugin::loop_thread()
+void RoverSitlGazeboPlugin::loop_thread()
 {
 
   // Or is 'boost::chrono::duration' better ?
@@ -245,7 +245,7 @@ void VehiclePlugin::loop_thread()
 /*
   Service for processes so they can grab a lapse-lock for the specified maximum time (wall time).
  */
-void VehiclePlugin::take_lapseLock(float max_holder_lock_duration)
+void RoverSitlGazeboPlugin::take_lapseLock(float max_holder_lock_duration)
 {
     _lapseLock_mutex.lock();        // prevents concurrent modification of lapse-lock data
     // If the caller asks for a longer lapse-lock pause than the current one, grants him his wish
@@ -262,7 +262,7 @@ void VehiclePlugin::take_lapseLock(float max_holder_lock_duration)
   Service for processes holding a lapselock, to signal their process is finished.
   @return true if it was the last holder of the lock (= lapse-lock is now free)
  */
-bool VehiclePlugin::release_lapseLock()
+bool RoverSitlGazeboPlugin::release_lapseLock()
 {
     bool is_lapseLock_now_free = false;
     
@@ -288,7 +288,7 @@ bool VehiclePlugin::release_lapseLock()
   @param loop_elapsed_dt: seconds
   @return true if the simulation can run, or false if paused 
  */
-bool VehiclePlugin::check_lapseLock(float loop_elapsed_dt)
+bool RoverSitlGazeboPlugin::check_lapseLock(float loop_elapsed_dt)
 {
     bool sim_can_run = false;
     
@@ -311,7 +311,7 @@ bool VehiclePlugin::check_lapseLock(float loop_elapsed_dt)
 }
 
 
-void VehiclePlugin::clear_lapseLock()
+void RoverSitlGazeboPlugin::clear_lapseLock()
 {
     _lapseLock_mutex.lock();        // prevents concurrent modification of lapse-lock data
     // Fully resets the lapse-lock

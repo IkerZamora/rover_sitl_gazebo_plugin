@@ -120,14 +120,14 @@
 namespace gazebo
 {
 
-class VehiclePlugin : public WorldPlugin
+class RoverSitlGazeboPlugin : public WorldPlugin
 {
 
   public:
     /// \brief Constructor
-    VehiclePlugin();
+    RoverSitlGazeboPlugin();
 
-    ~VehiclePlugin();
+    ~RoverSitlGazeboPlugin();
 
     //Public function members
     void Load(physics::WorldPtr world, sdf::ElementPtr sdf);
@@ -154,10 +154,8 @@ class VehiclePlugin : public WorldPlugin
     //void OnVelMsg(const geometry_msgs::Twist &vel_cmd);
     
     // Services:
-    bool service_take_lapseLock(rover_sitl_gazebo_plugin::TakeApmLapseLock::Request  &req,
-                                rover_sitl_gazebo_plugin::TakeApmLapseLock::Response &res);
-    bool service_release_lapseLock(rover_sitl_gazebo_plugin::ReleaseApmLapseLock::Request  &req,
-                                   rover_sitl_gazebo_plugin::ReleaseApmLapseLock::Response &res);
+    bool service_take_lapseLock(rover_sitl_gazebo_plugin::TakeApmLapseLock::Request  &req, rover_sitl_gazebo_plugin::TakeApmLapseLock::Response &res);
+    bool service_release_lapseLock(rover_sitl_gazebo_plugin::ReleaseApmLapseLock::Request  &req, rover_sitl_gazebo_plugin::ReleaseApmLapseLock::Response &res);
 
   protected:
 

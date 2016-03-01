@@ -63,7 +63,7 @@ catkin_package(
 ###########
 
 add_library(${PROJECT_NAME}
-  src/VehiclePlugin.cc
+  src/rover_sitl_gazebo_plugin.cc
   src/vehicle_plugin_apm_side.cc
   src/SocketAPM.cc
   src/vehicle_plugin_gazebo_side.cc

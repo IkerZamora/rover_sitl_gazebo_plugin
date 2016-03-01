@@ -28,7 +28,7 @@
 //    _msg->reset().has_model_only()
 
 
-#include "VehiclePlugin.hh"
+#include "rover_sitl_gazebo_plugin.hh"
 
 namespace gazebo
 {
@@ -41,7 +41,7 @@ namespace gazebo
   Initializes variables related to Gazebo.
   In case of fatal failure, returns 'false'.
  */
-bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sdf)
+bool RoverSitlGazeboPlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sdf)
 {
     // Saves pointers to the parent world
     _parent_world = world;
@@ -178,7 +178,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     this->rearPower = _sdf->Get<double>("rear_power");
 
     this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&VehiclePlugin::on_gazebo_update, this)));
+          boost::bind(&RoverSitlGazeboPlugin::on_gazebo_update, this)));
 
     this->node = transport::NodePtr(new transport::Node());
 
@@ -188,7 +188,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     ros::init(argc, NULL, "rover_model_plugin");
 
     //ros::NodeHandle rosnode;
-    //this->velSub = _rosnode.subscribe("/rover/cmd_vel", 100, &VehiclePlugin::OnVelMsg, this);
+    //this->velSub = _rosnode.subscribe("/rover/cmd_vel", 100, &RoverSitlGazeboPlugin::OnVelMsg, this);
 
     // FROM MODEL PLUGIN Init()
 
@@ -213,7 +213,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     // Maximum brake is the upper limit of the gas joint
     this->maxBrake = this->gasJoint->GetHighStop(0).Radian();
 
-    printf("SteeringRation[%f] MaxGa[%f]\n", this->steeringRatio, this->maxGas);
+    ROS_INFO("SteeringRatio[%f] MaxGas[%f]\n", this->steeringRatio, this->maxGas);
 
     //-------------------------------------------------
 
@@ -237,15 +237,15 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
     physicsMsg.set_max_step_size(STEP_SIZE_FOR_ARDUPILOT);
     physicsPub->Publish(physicsMsg);
     
-    _controlSub = node->Subscribe("~/world_control", &VehiclePlugin::on_gazebo_control, this);
+    _controlSub = node->Subscribe("~/world_control", &RoverSitlGazeboPlugin::on_gazebo_control, this);
     
-    //_modelInfoSub = node->Subscribe("~/model/info", &VehiclePlugin::on_gazebo_modelInfo, this);
+    //_modelInfoSub = node->Subscribe("~/model/info", &RoverSitlGazeboPlugin::on_gazebo_modelInfo, this);
     
     //this->newFrameConnection = this->camera->ConnectNewImageFrame(
     //  boost::bind(&CameraPlugin::OnNewFrame, this, _1, _2, _3, _4, _5));
 
     _updateConnection = event::Events::ConnectWorldUpdateEnd(
-          boost::bind(&VehiclePlugin::on_gazebo_update, this));
+          boost::bind(&RoverSitlGazeboPlugin::on_gazebo_update, this));
     // Or we could also use 'ConnectWorldUpdateBegin'
     // For a list of all available connection events, see: Gazebo-X.X/gazebo/common/Events.hh 
     
@@ -261,7 +261,7 @@ bool VehiclePlugin::init_gazebo_side(physics::WorldPtr world, sdf::ElementPtr sd
 /*
   Advances the simulation by 1 step
  */
-void VehiclePlugin::step_gazebo_sim()
+void RoverSitlGazeboPlugin::step_gazebo_sim()
 {
     // The simulation must be in Pause mode for the Step function to work.
     // This ensures that Ardupilot does not miss a single step of the physics solver.
@@ -275,7 +275,7 @@ void VehiclePlugin::step_gazebo_sim()
   Callback from gazebo after each simulation step
   (thus after each call to 'step_gazebo_sim()')
  */
-void VehiclePlugin::on_gazebo_update()
+void RoverSitlGazeboPlugin::on_gazebo_update()
 {
     // This method is executed independently from the main loop thread.
     // Beware of access to shared variables memory. USe mutexes if required.
@@ -380,7 +380,7 @@ void VehiclePlugin::on_gazebo_update()
   Emulates the Pause GUI button functionnality.
   Shortcomings: The GUI button does not change shape between Play/Resume
  */
-void VehiclePlugin::on_gazebo_control(ConstWorldControlPtr &_msg)
+void RoverSitlGazeboPlugin::on_gazebo_control(ConstWorldControlPtr &_msg)
 {
     // This method is executed independently from the main loop thread.
     // Beware of access to shared variables memory. Use mutexes if required.
@@ -408,7 +408,7 @@ void VehiclePlugin::on_gazebo_control(ConstWorldControlPtr &_msg)
   Used to detect the end of asynchronous model loading.
  */
 /*
-void VehiclePlugin::on_gazebo_modelInfo(ConstModelPtr &_msg)
+void RoverSitlGazeboPlugin::on_gazebo_modelInfo(ConstModelPtr &_msg)
 {
     // This method is executed independently from the main loop thread.
     // Beware of access to shared variables memory. Use mutexes if required.
