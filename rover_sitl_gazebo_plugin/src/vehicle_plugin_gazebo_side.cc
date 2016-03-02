@@ -48,14 +48,14 @@ bool RoverSitlGazeboPlugin::init_gazebo_side(physics::WorldPtr world, sdf::Eleme
     _sdf = sdf;
 
     // Pause de simulation until rover model is inserted
-    ROS_INFO("Waiting for rover model to be inseted...");
-    _parent_world->SetPaused(true);
+    ROS_INFO("Waiting for rover model to be inserted...");
+    //_parent_world->SetPaused(true);
     while (!world->GetModel("rover")){
         continue;
     }
     ROS_INFO("Rover model inserted!");
     _rover_model = world->GetModel("rover");
-    _parent_world->SetPaused(false);
+    //_parent_world->SetPaused(false);
 
 
     // Setup Gazebo node infrastructure
@@ -184,8 +184,8 @@ bool RoverSitlGazeboPlugin::init_gazebo_side(physics::WorldPtr world, sdf::Eleme
 
     this->node->Init(_rover_model->GetWorld()->GetName());
 
-    int argc = 0;
-    ros::init(argc, NULL, "rover_model_plugin");
+    //int argc = 0;
+    //ros::init(argc, NULL, "rover_model_plugin");
 
     //ros::NodeHandle rosnode;
     //this->velSub = _rosnode.subscribe("/rover/cmd_vel", 100, &RoverSitlGazeboPlugin::OnVelMsg, this);
