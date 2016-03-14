@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rover_sitl_gazebo_plugin)
+project(ardupilot_sitl_gazebo_plugin)
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS 
@@ -9,6 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
   mav_msgs
   std_msgs
   message_generation
+
+  rotors_gazebo_plugins
+  glog_catkin
+  sensor_msgs
 )
 include_directories(include ${catkin_INCLUDE_DIRS})
 
@@ -55,6 +59,10 @@ catkin_package(
     geometry_msgs
     mav_msgs
     message_runtime
+
+    rotors_gazebo_plugins
+    glog_catkin
+    sensor_msgs
 )
 
 

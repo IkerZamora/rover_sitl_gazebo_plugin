@@ -88,6 +88,7 @@ bool RoverSitlGazeboPlugin::open_fdm_socket()
 
     ROS_INFO( PLUGIN_LOG_PREPEND "Opened ArduPilot fdm socket\n");
     _sock_fdm_to_ardu->set_blocking(false);
+    ROS_INFO("fdm socket blocking set to false");
     _is_fdm_socket_open = true;
 
     // First message: introduction
@@ -116,6 +117,7 @@ bool RoverSitlGazeboPlugin::receive_apm_input()
     }
     szRecv = _sock_control_from_ardu->recv(&pkt, sizeof(pkt), 100);
     ROS_INFO("recv = %d", szRecv);
+
     // Expects a servo control packet
     if (szRecv != sizeof(servo_packet)) {
         return false;

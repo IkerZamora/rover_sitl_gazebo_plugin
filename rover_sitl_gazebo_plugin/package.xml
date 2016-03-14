@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>rover_sitl_gazebo_plugin</name>
+  <name>ardupilot_sitl_gazebo_plugin</name>
   <version>0.0.0</version>
   <description>The rover_sitl_gazebo_plugin package</description>
 
@@ -47,12 +47,20 @@
   <build_depend>mav_msgs</build_depend>
   <build_depend>message_generation</build_depend>
 
+  <build_depend>rotors_gazebo_plugins</build_depend>
+  <build_depend>glog_catkin</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
 
   <run_depend>gazebo_ros</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mav_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
+
+  <run_depend>rotors_gazebo_plugins</run_depend>
+  <run_depend>glog_catkin</run_depend>
+  <run_depend>sensor_msgs</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

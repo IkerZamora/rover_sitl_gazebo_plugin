@@ -128,7 +128,7 @@ void RoverSitlGazeboPlugin::imu_callback(const sensor_msgs::Imu &imu_msg)
     
     // Mutex on '_fdm', for it is concurrently read by 'send_apm_output()'
     _fdm_mutex.lock();
-    
+
     // Attitude (quaternion)
     _fdm.imu_orientation_quat[0] =  imu_msg.orientation.w;
     _fdm.imu_orientation_quat[1] =  imu_msg.orientation.x;
@@ -188,7 +188,7 @@ void RoverSitlGazeboPlugin::gps_callback(const sensor_msgs::NavSatFix &gps_fix_m
         
         // Latitude & longitude can be tricky to interpret in a debug log.
         // That is why the home debug was introduced, to display results in a more readable coordinate system.
-        ROS_INFO( PLUGIN_LOG_PREPEND "GPS latitude = %f [d] - %f [m]   longi = %f [d] - %f [m]   alt = %f [m]", gps_fix_msg.latitude, north_m, gps_fix_msg.longitude, east_m, gps_fix_msg.altitude);
+        ROS_DEBUG( PLUGIN_LOG_PREPEND "GPS latitude = %f [d] - %f [m]   longi = %f [d] - %f [m]   alt = %f [m]", gps_fix_msg.latitude, north_m, gps_fix_msg.longitude, east_m, gps_fix_msg.altitude);
     #endif // DEBUG_DISP_GPS_POSITION
 }
 

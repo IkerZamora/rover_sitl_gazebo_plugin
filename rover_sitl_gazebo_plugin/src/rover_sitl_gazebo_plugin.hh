@@ -113,7 +113,7 @@
 #define PLUGIN_LOG_PREPEND       "ROVER: "
 
 // Uncomment the following lines to activate some debug
-#define DEBUG_DISP_GPS_POSITION
+//#define DEBUG_DISP_GPS_POSITION
 #define DEBUG_DISP_MOTORS_COMMANDS
 
 
