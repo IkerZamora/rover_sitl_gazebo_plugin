@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>ardupilot_sitl_gazebo_plugin</name>
+  <name>rover_sitl_gazebo_plugin</name>
   <version>0.0.0</version>
   <description>The rover_sitl_gazebo_plugin package</description>
 
