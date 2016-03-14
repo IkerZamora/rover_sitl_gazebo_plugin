@@ -327,5 +327,126 @@
         </ode>
       </physics>
     </joint>
+
+    <!-- IMU -->
+
+    <link name="imu_link">
+      <pose> 0 0 0.3 0 0 0</pose>
+      <!--<collision name="collision">
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+      </collision>-->
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="imu_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>imu_link</child>
+      <axis>
+        <xyz>0.05 0 0.15</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+        </limit>
+        <use_parent_model_frame>true</use_parent_model_frame>
+      </axis>
+    </joint>
+
+
+
+    <plugin name ="gps_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>true</alwaysOn>
+      <topicName>/rover/fix</topicName>
+      <velocityTopicName>/rover/fix_velocity</velocityTopicName>
+      <referenceLatitude>-35.363261</referenceLatitude>
+      <referenceLongitude>149.165230</referenceLongitude>
+      <referenceHeading>0</referenceHeading>
+      <referenceAltitude>584</referenceAltitude>
+      
+      <!-- Sensor errors model for GPS Position measures -->
+      <!-- Units: [m], and [1/s] for drift frequency -->
+      <!-- For now, use Ardupilot's internal error models -->
+      <offset>0 0 0</offset>
+      <drift>0 0 0</drift>
+      <driftFrequency>0 0 0</driftFrequency>
+      <gaussianNoise>0 0 0</gaussianNoise>
+      <scaleError>1 1 1</scaleError>
+      
+      <!-- Note:
+       For the moment there is no barometer, so axis Z of the GPS is
+       used as a barometer sensor (with the according error model) -->
+      
+      <!-- Sensor errors model for GPS Velocity measures -->
+      <!-- Units: [m/s], and [1/s] for drift frequency -->
+      <!-- For now, use Ardupilot's internal error models -->
+      <velocityOffset>0 0 0</velocityOffset>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityDriftFrequency>0 0 0</velocityDriftFrequency>
+      <velocityGaussianNoise>0 0 0</velocityGaussianNoise>
+      <velocityScaleError>1 1 1</velocityScaleError>
+      
+      <!-- Note:
+        The velocity Z does not really make sense, it is not used by
+        Ardupilot (right?).
+        However Z velocity drift is added to the Z position drift. -->
+        
+      <!-- Explanations:
+         offset:          constant added to the real value
+         gaussian noise:  randomly generated noise added to the real value
+         drift:           amount of drift
+         drift frequency: time constant (as a frequency) for the drift
+         scale error:     scaling of the real value (before adding other noises)
+       -->
+    </plugin>
+
+    <plugin name="rover_imu_sim" filename="libhector_gazebo_ros_imu.so">
+      <updateRate>100.0</updateRate>
+      <bodyName>imu_link</bodyName>
+      <topicName>/rover/ground_truth/imu</topicName>
+      <rpyOffset>0 0 0</rpyOffset>
+      <gaussianNoise>0</gaussianNoise>
+      <accelDrift>0.5 0.5 0.5</accelDrift>
+      <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
+      <rateDrift>0.1 0.1 0.1</rateDrift>
+      <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
+      <headingDrift>0.1</headingDrift>
+      <headingGaussianNoise>0.05</headingGaussianNoise>
+    </plugin>
+<!--
+    <plugin name="gazebo_ros_rover_controller" filename="librotors_gazebo_sonar_plugin.so">
+      <gaussianNoise>0.005</gaussianNoise>
+      <topicName>/sonar_front</topicName>
+      <frameId>sonar_link</frameId>
+    </plugin>
+
+    <plugin name="gazebo_ros_rover_controller" filename="libgazebo_ros_laser.so">
+          <topicName>/scan</topicName>
+          <frameName>laser_link</frameName>
+    </plugin>
+
+    <plugin name="rover_camera_controller" filename="libgazebo_ros_camera.so">
+          <cameraName>rover</cameraName>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>60</updateRate>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>camera_link</frameName>
+    </plugin>
+-->
   </model>
 </sdf>
