@@ -120,14 +120,14 @@
 namespace gazebo
 {
 
-class RoverSitlGazeboPlugin : public WorldPlugin
+class ArduPilotSitlGazeboPlugin : public WorldPlugin
 {
 
   public:
     /// \brief Constructor
-    RoverSitlGazeboPlugin();
+    ArduPilotSitlGazeboPlugin();
 
-    ~RoverSitlGazeboPlugin();
+    ~ArduPilotSitlGazeboPlugin();
 
     //Public function members
     void Load(physics::WorldPtr world, sdf::ElementPtr sdf);
