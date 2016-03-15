@@ -181,9 +181,9 @@ class ArduPilotSitlGazeboPlugin : public WorldPlugin
       // You can add here extra sensors to pass along
       double sonar_down;                            // [m] downward facing range finder
       
-    #if SONAR_FRONT == ENABLED
+    //#if SONAR_FRONT == ENABLED
       double sonar_front;                           // [m] forward facing range finder
-    #endif
+    //#endif
       
     };
 
