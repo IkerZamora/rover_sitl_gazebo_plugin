@@ -1,1 +1,0 @@
-Move folders inside this folder into ~/.gazebo/models
